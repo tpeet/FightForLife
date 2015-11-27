@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
-public class MouseController : MonoBehaviour {
-	
-	RaycastHit hit;
+public class MouseController : MonoBehaviour
+{
+
+    #region Variables
+    RaycastHit hit;
 
     // variables for selecting units
     public static List<GameObject> CurrentlySelectedUnits = new List<GameObject>();
@@ -19,12 +21,17 @@ public class MouseController : MonoBehaviour {
 
 
     // variables for dragging
-    public static bool UserIsDragging;
     public float TimeLimitBeforeDeclareDrag = 0.5f;
+    public static bool UserIsDragging;
     private static float TimeLeftBeforeDeclareDrag;
     private static Vector2 MouseDragStart;
+    private static Vector3 MouseUpPoint;
+    private static Vector3 CurrentMousePoint;
 
-	void Awake() {
+    public GUIStyle MouseDragSkin;
+
+    #endregion
+    void Awake() {
 		mouseDownPoint = Vector3.zero;
 	}
 
@@ -33,6 +40,7 @@ public class MouseController : MonoBehaviour {
 
 		if (Physics.Raycast (ray, out hit, Mathf.Infinity)) {
             var hitGameObject = hit.collider.gameObject;
+		    CurrentMousePoint = hit.point;
 
 
             // Mouse dragging
@@ -132,7 +140,20 @@ public class MouseController : MonoBehaviour {
 	} // end of Update()
 
 
-
+    void OnGUI()
+    {
+        if (UserIsDragging)
+        {
+            var dragAreaWidth = Camera.main.WorldToScreenPoint(mouseDownPoint).x -
+                           Camera.main.WorldToScreenPoint(CurrentMousePoint).x;
+            var dragAreaHeight = Camera.main.WorldToScreenPoint(mouseDownPoint).y -
+                           Camera.main.WorldToScreenPoint(CurrentMousePoint).y;
+            var dragAreaLeft = Input.mousePosition.x;
+            var dragAreaRight = (Screen.height - Input.mousePosition.y) - dragAreaHeight;
+            GUI.Box(new Rect(dragAreaLeft, dragAreaRight, dragAreaWidth, dragAreaHeight), "", MouseDragSkin);
+        }
+        
+    }
 
 
 
