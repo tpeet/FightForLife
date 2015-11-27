@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,31 +9,60 @@ public class MouseController : MonoBehaviour {
 	
 	RaycastHit hit;
 
-    //public static GameObject CurrentlySelectedUnit;
-
+    // variables for selecting units
     public static List<GameObject> CurrentlySelectedUnits = new List<GameObject>();
-
 	private Vector3 mouseDownPoint;
+    public float ClickDragZone = 5f;
 
+    // variables for target assignment
 	public GameObject target;
 
 
+    // variables for dragging
+    public static bool UserIsDragging;
+    public float TimeLimitBeforeDeclareDrag = 0.5f;
+    private static float TimeLeftBeforeDeclareDrag;
+    private static Vector2 MouseDragStart;
 
 	void Awake() {
 		mouseDownPoint = Vector3.zero;
 	}
 
 	void Update () {
-		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+		var ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 
 		if (Physics.Raycast (ray, out hit, Mathf.Infinity)) {
+            var hitGameObject = hit.collider.gameObject;
 
-			if (Input.GetMouseButtonDown(0))
-			    mouseDownPoint = hit.point;
 
-		    var hitGameObject = hit.collider.gameObject;
+            // Mouse dragging
+		    if (Input.GetMouseButtonDown(0))
+		    {
+                mouseDownPoint = hit.point;
+		        TimeLeftBeforeDeclareDrag = TimeLimitBeforeDeclareDrag;
+		        MouseDragStart = Input.mousePosition;
 
-            // hitting terrain
+		    }
+		    else if (Input.GetMouseButton(0))
+		    {
+		        if (!UserIsDragging)
+		        {
+		            TimeLeftBeforeDeclareDrag -= Time.deltaTime;
+                    if (TimeLeftBeforeDeclareDrag <= 0f || IsUserDraggingByPosition(MouseDragStart, Input.mousePosition))
+		                UserIsDragging = true;
+		        }
+                else
+                    Debug.Log("User is dragging");
+		    }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                TimeLeftBeforeDeclareDrag = 0f;
+                UserIsDragging = false;
+            }
+			    
+
+            // mouse click
+		    if (UserIsDragging) return; 
 			if (hit.collider.name == "Terrain") 
 			{
 				target.transform.position = hit.point;
@@ -40,7 +70,7 @@ public class MouseController : MonoBehaviour {
 				//right mousebutton
 				if(Input.GetMouseButtonDown(1))
 				{
-				    var targetObj = Instantiate(target, mouseDownPoint, Quaternion.identity) as GameObject;
+				    var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
 				    if (targetObj != null) targetObj.name = "Target (Instantiated)";
 				}
 
@@ -72,9 +102,18 @@ public class MouseController : MonoBehaviour {
                             CurrentlySelectedUnits.Add(hitGameObject);                            
 
                         }
+
+                        //if selecting an object which is already selected
                         else
                         {
-                            RemoveUnitFromCurrentlySelectedUnits(hitGameObject);
+                            if (ShiftKeyDown())
+                                RemoveUnitFromCurrentlySelectedUnits(hitGameObject);
+                            else
+                            {
+                                DeselectGameobjectsIfSelected();
+                                hit.collider.transform.FindChild("Selected").gameObject.SetActive(true);
+                                CurrentlySelectedUnits.Add(hitGameObject);
+                            }
                         }
 			        }
 			        else
@@ -90,8 +129,8 @@ public class MouseController : MonoBehaviour {
                 DeselectGameobjectsIfSelected();
 		}
 
-		Debug.DrawRay(ray.origin, ray.direction * 500, Color.yellow);
-	}
+	} // end of Update()
+
 
 
 
@@ -103,13 +142,21 @@ public class MouseController : MonoBehaviour {
 
 	#region Helper functions
 
+    public bool IsUserDraggingByPosition(Vector2 dragStartPoint, Vector2 newPoint)
+    {
+        return ((newPoint.x > dragStartPoint.x + ClickDragZone || newPoint.x < dragStartPoint.x - ClickDragZone) ||
+            (newPoint.y > dragStartPoint.y + ClickDragZone || newPoint.y < dragStartPoint.y - ClickDragZone));
+    }
+
+
+
 	public bool DidUserClickLeftMouse(Vector3 hitPoint)
 	{
-		var clickZone = 0.8f;
+	    Debug.Log(String.Format("{0} - {1}", mouseDownPoint.x, hitPoint.x));
 		return (
-			(mouseDownPoint.x < hitPoint.x + clickZone && mouseDownPoint.x > hitPoint.x - clickZone) &&
-			(mouseDownPoint.y < hitPoint.y + clickZone && mouseDownPoint.y > hitPoint.y - clickZone) &&
-			(mouseDownPoint.z < hitPoint.z + clickZone && mouseDownPoint.z > hitPoint.z - clickZone));
+			(mouseDownPoint.x < hitPoint.x + ClickDragZone && mouseDownPoint.x > hitPoint.x - ClickDragZone) &&
+			(mouseDownPoint.y < hitPoint.y + ClickDragZone && mouseDownPoint.y > hitPoint.y - ClickDragZone) &&
+			(mouseDownPoint.z < hitPoint.z + ClickDragZone && mouseDownPoint.z > hitPoint.z - ClickDragZone));
 	}
 
 
