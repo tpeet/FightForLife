@@ -86,7 +86,7 @@ public class WorldCamera : MonoBehaviour {
 		var desiredZ = 0f;
 		var moveSpeed = 0f;
 
-		if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift))
+		if (Common.ShiftKeyDown())
 			moveSpeed = (_cameraMoveSpeed + _shiftBonus) * Time.deltaTime;
 		else
 			moveSpeed = _cameraMoveSpeed * Time.deltaTime;
