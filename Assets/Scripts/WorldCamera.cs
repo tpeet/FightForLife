@@ -34,7 +34,9 @@ public class WorldCamera : MonoBehaviour {
 	public float MouseBoundary = 25f;
     public BoxLimit cameraLimits;
 
-	void Awake() {
+    public bool MoveByMouse;
+
+    void Awake() {
 		Instance = this;
 	}
 
@@ -106,16 +108,16 @@ public class WorldCamera : MonoBehaviour {
 
 
 		//move by mouse
-		if (Input.mousePosition.x < mouseScrollLimits.LeftLimit)
+		if (Input.mousePosition.x < mouseScrollLimits.LeftLimit && MoveByMouse)
 			desiredX = -moveSpeed;
 
-		if (Input.mousePosition.x > (Screen.width - mouseScrollLimits.RightLimit))
+		if (Input.mousePosition.x > (Screen.width - mouseScrollLimits.RightLimit) && MoveByMouse)
 			desiredX = moveSpeed;
 
-		if (Input.mousePosition.y < mouseScrollLimits.BottomLimit)
+		if (Input.mousePosition.y < mouseScrollLimits.BottomLimit && MoveByMouse)
 			desiredZ = -moveSpeed;
 		
-		if (Input.mousePosition.y > (Screen.height - mouseScrollLimits.TopLimit))
+		if (Input.mousePosition.y > (Screen.height - mouseScrollLimits.TopLimit) && MoveByMouse)
 			desiredZ = moveSpeed;
 
         return new Vector3(desiredX, desiredZ, 0);

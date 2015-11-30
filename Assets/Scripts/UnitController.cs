@@ -6,7 +6,7 @@ public class UnitController : MonoBehaviour
     public Vector2 ScreenPos;
     private bool OnScreen;
     public bool Selected = false;
-
+    public bool IsWalkable = true;
 	
 	void Update () {
 	    // if unit not selected, get screen space

@@ -40,6 +40,10 @@ public class MouseController : MonoBehaviour
     private bool FinishedDragOnThisFrame;
     private bool StartedDrag;
 
+
+    // pathfinding
+    public static Vector3 RightClickPoint;
+
     #endregion
 
 
@@ -92,13 +96,14 @@ public class MouseController : MonoBehaviour
             if (!UserIsDragging)
             {
 
-                if (hit.collider.name == "Terrain")
+                if (hit.collider.CompareTag("Ground"))
                 {
                     target.transform.position = hit.point;
 
                     //right mousebutton
                     if (Input.GetMouseButtonDown(1))
                     {
+                        RightClickPoint = hit.point;
                         var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
                         if (targetObj != null)
                             targetObj.name = "Target (Instantiated)";
@@ -130,6 +135,8 @@ public class MouseController : MonoBehaviour
                                 hit.collider.transform.FindChild("Selected").gameObject.SetActive(true);
                                 CurrentlySelectedUnits.Add(hitGameObject);
 
+                                hit.collider.gameObject.GetComponent<UnitController>().Selected = true;
+
                             }
 
                             //if selecting an object which is already selected
@@ -142,6 +149,7 @@ public class MouseController : MonoBehaviour
                                     DeselectGameobjectsIfSelected();
                                     hit.collider.transform.FindChild("Selected").gameObject.SetActive(true);
                                     CurrentlySelectedUnits.Add(hitGameObject);
+                                    hit.collider.gameObject.GetComponent<UnitController>().Selected = true;
                                 }
                             }
                         }
@@ -215,12 +223,14 @@ public class MouseController : MonoBehaviour
                     {
                         selectedObj.SetActive(true);
                         UnitsInDrag.Add(unitObj);
+                        unitScript.Selected = true;
                         //Debug.Log("Unit is inside Drag area - " + selectedObj.transform.parent.name);
                     }
                     else
                     {
-                        if (!CurrentlySelectedUnits.Contains(unitObj))
-                            selectedObj.SetActive(false);
+                        selectedObj.SetActive(false);
+                        unitScript.Selected = false;
+
                     }
                 }
             }
@@ -299,6 +309,7 @@ public class MouseController : MonoBehaviour
                 {
                     CurrentlySelectedUnits.RemoveAt(i);
                     currentlySelectedUnit.transform.FindChild("Selected").gameObject.SetActive(false);
+                    currentlySelectedUnit.GetComponent<UnitController>().Selected = false;
                 }
 
             }
@@ -329,7 +340,11 @@ public class MouseController : MonoBehaviour
     {
         var unitsInDragNotCurrentlySelected = UnitsInDrag.Where(x => !CurrentlySelectedUnits.Contains(x)).ToList();
         foreach (var o in unitsInDragNotCurrentlySelected)
+        {
             o.GetComponent<UnitController>().Selected = true;
+            o.transform.FindChild("Selected").gameObject.SetActive(true);
+        }
+            
         CurrentlySelectedUnits.AddRange(unitsInDragNotCurrentlySelected);
     }
 
