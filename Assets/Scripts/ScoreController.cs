@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -37,6 +38,7 @@ public class ScoreController : MonoBehaviour
         MinX = HealthTransform.position.x - HealthTransform.rect.width;
         CurrentOverallHealth = maxHealth;
         OnCoolDown = false;
+        _sweatButton = GameObject.Find("SweatButton").GetComponent<Button>();
     }
 	
 	// Update is called once per frame
@@ -58,26 +60,51 @@ public class ScoreController : MonoBehaviour
     private void HandleHealth()
     {
         HealthText.text = "Health: " + CurrentOverallHealth;
-        var currentX = MapHealthToPosition(CurrentOverallHealth, 0, maxHealth, MinX, MaxX);
+        var currentX = MapHealthBarValues(CurrentOverallHealth, 0, maxHealth, MinX, MaxX);
         HealthTransform.position = new Vector3(currentX, CachedY);
 
         // more than 50% health
         if (CurrentOverallHealth > maxHealth/2)
         {
-            var redChannelValue = MapHealthToPosition(CurrentOverallHealth, maxHealth/2, maxHealth, 255, 0);
+            var redChannelValue = MapHealthBarValues(CurrentOverallHealth, maxHealth/2, maxHealth, 255, 0);
             VisualHealth.color = new Color32((byte) redChannelValue, 255, 0, 255);
         }
 
         //less than 50% health
         else
         {
-            var greenChannelValue = MapHealthToPosition(CurrentOverallHealth, 0, maxHealth/2, 0, 255);
+            var greenChannelValue = MapHealthBarValues(CurrentOverallHealth, 0, maxHealth/2, 0, 255);
             VisualHealth.color = new Color32(255, (byte) greenChannelValue, 0, 255);
         }
     }
 
-    private float MapHealthToPosition(float x, float inMin, float inMax, float outMin, float outMax)
+    private static float MapHealthBarValues(float x, float inMin, float inMax, float outMin, float outMax)
     {
         return (x - inMin)*(outMax - outMin)/(inMax - inMin) + outMin;
     }
+
+
+    // Sweating
+    public int SweatHealthBonus = 20;
+    public int SweatTimeout = 30;
+    private Button _sweatButton;
+
+    public void Sweat()
+    {
+        CurrentOverallHealth += SweatHealthBonus;
+        CurrentOverallHealth = Mathf.Clamp(CurrentOverallHealth, 0, 100);
+        StartCoroutine(SweatWait());
+
+    }
+
+    IEnumerator SweatWait()
+    {
+        _sweatButton.interactable = false;
+        yield return new WaitForSeconds(SweatTimeout);
+        _sweatButton.interactable = true;
+    }
+
+
+
+
 }
