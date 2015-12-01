@@ -7,7 +7,8 @@ public class UnitController : MonoBehaviour
     private bool OnScreen;
     public bool Selected = false;
     public bool IsWalkable = true;
-	
+
+
 	void Update () {
 	    // if unit not selected, get screen space
 	    if (!Selected)
