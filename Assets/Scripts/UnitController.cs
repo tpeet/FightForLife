@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
+// Used for showing if unit is selected
 public class UnitController : MonoBehaviour
 {
     public Vector2 ScreenPos;

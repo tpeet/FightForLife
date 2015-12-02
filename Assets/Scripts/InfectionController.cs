@@ -26,8 +26,14 @@ public class InfectionController : MonoBehaviour
 	        var allowedAreaBegginingY = WorldTerrain.GetPosition().z + (2*terrainLength/3) + (terrainLength/12);
 	        var allowedAreaEndingY = WorldTerrain.GetPosition().z + (2*terrainLength/3) + (terrainLength / 4);
 	        var positionZ = Random.Range(allowedAreaBegginingY, allowedAreaEndingY);
-            Instantiate(Bacteria, new Vector3(positionX, 0.05f, positionZ), Quaternion.identity);
-        }
+            var bacteria = Instantiate(Bacteria, new Vector3(positionX, 0.05f, positionZ), Quaternion.identity) as GameObject;
+	        if (bacteria != null)
+	        {
+                bacteria.GetComponent<BacteriaController>().IsParent = true;
+                bacteria.name = "Bacteria" + (i + 1);
+            }
+
+	    }
 	    
 	}
 	

@@ -2,6 +2,8 @@
 using System.Collections;
 using Pathfinding;
 
+
+
 public class UnitPath : MonoBehaviour {
 
 
@@ -9,7 +11,7 @@ public class UnitPath : MonoBehaviour {
     private Seeker Seeker;
     private CharacterController Controller;
     public Path Path;
-    public float Speed = 20;
+    public float Speed = 500;
     private UnitController Unit;
 
     // the max distance from the AI to a waypoint for it to continue to the next waypoint
