@@ -16,7 +16,6 @@ public class BacteriaController : MonoBehaviour
 
     public Vector3 Target = Vector3.zero;
 
-    
     private GameObject _bacteria;
 
     // pathfinding variables
@@ -25,11 +24,21 @@ public class BacteriaController : MonoBehaviour
     public Path Path;
     private Seeker _seeker;
     private int _currentWaypoint;
+    private Terrain _terrain;
+
+
+
+    private int _numberOfInitialBacterias;
+    private Vector3 _terrainSize;
 
     void Start()
     {
         _bacteria = gameObject;
         _seeker = GetComponent<Seeker>();
+
+        _terrain = FindObjectOfType<Terrain>();
+        _terrainSize = _terrain.terrainData.size;
+        _numberOfInitialBacterias = GameObject.Find("GameController").GetComponent<InfectionController>().NumberOfInitialBacterias;
 
         if (IsParent)
         {
@@ -46,8 +55,10 @@ public class BacteriaController : MonoBehaviour
             //var parentLocation = parentBacteriaController.transform.position;
             var locationDifference = parentBacteriaController.transform.position - transform.position;
             Target = parentBacteriaController.Target - locationDifference;
+            //Target.z = Mathf.Clamp(Target.x, _terrain.GetPosition().z + 5,
+            //    _terrain.GetPosition().z + _terrain.terrainData.size.z);
 
-            
+
 
         }
         _seeker.StartPath(transform.position, Target, OnPathComplete);
@@ -66,6 +77,19 @@ public class BacteriaController : MonoBehaviour
         {
             _currentWaypoint++;
         }
+
+
+    }
+
+    // defines the limits for selecting each group of bacteria by mouse
+    public Common.Boundary GetBacteriaGroupBoundary()
+    {
+        Common.Boundary groupBoundary;
+        groupBoundary.xMin = (-1) * (_terrainSize.x / (_numberOfInitialBacterias * 4)) + transform.position.x;
+        groupBoundary.xMax = (_terrainSize.x / (_numberOfInitialBacterias * 4)) + transform.position.x;
+        groupBoundary.yMin = (-1)*(_terrainSize.z / (_numberOfInitialBacterias * 4)) + transform.position.z;
+        groupBoundary.yMax = (_terrainSize.z / (_numberOfInitialBacterias * 4)) + transform.position.z;
+        return groupBoundary;
     }
 
 
@@ -80,32 +104,32 @@ public class BacteriaController : MonoBehaviour
 
     private IEnumerator GenerateBacteria()
     {
+
+
+        var terrainPosition = _terrain.GetPosition();
+
+        var minLimit = new Vector2(terrainPosition.x, terrainPosition.z);
+        var maxLimit = new Vector2(terrainPosition.x + _terrainSize.x, terrainPosition.z + _terrainSize.z);
         for (var i=0; i < MaxNumberOfBacterias; i++)
         {
-
-
             yield return new WaitForSeconds(BacteriaGenerationTime);
-            var numberOfInitialBacterias =
-                GameObject.Find("GameController").GetComponent<InfectionController>().NumberOfInitialBacterias;
-
-            var terrain = FindObjectOfType<Terrain>();
-            var terrainSize = terrain.terrainData.size;
-            var terrainPosition = terrain.GetPosition();
-
-            var minLimit = new Vector2(terrainPosition.x, terrainPosition.z);
-            var maxLimit = new Vector2(terrainPosition.x + terrainSize.x, terrainPosition.z + terrainSize.z);
 
             var position = new Vector2(Mathf.Infinity, Mathf.Infinity);
-
-            var bacteriaSize = gameObject.GetComponentInChildren<Renderer>().bounds.size;
+            var bacteriaRenderer = gameObject.GetComponentInChildren<Renderer>();
+            if (bacteriaRenderer == null)
+                break;
+            var bacteriaSize = bacteriaRenderer.bounds.size;
 
             while (position.x + bacteriaSize.x < minLimit.x || position.x - bacteriaSize.x > maxLimit.x ||
                    position.y + bacteriaSize.z < minLimit.y || position.y - bacteriaSize.z > maxLimit.y)
             {
                 var randVector = Random.insideUnitCircle;
-                position.x = randVector.x*(terrainSize.x/(numberOfInitialBacterias*4)) + transform.position.x;
-                position.y = randVector.y*(terrainSize.z/(numberOfInitialBacterias*4)) + transform.position.z;
+                position.x = randVector.x*(_terrainSize.x/(_numberOfInitialBacterias*4)) + transform.position.x;
+                position.y = randVector.y*(_terrainSize.z/(_numberOfInitialBacterias*4)) + transform.position.z;
             }
+
+
+
             var childBacteria =
                 Instantiate(_bacteria, new Vector3(position.x, 1f, position.y), Quaternion.identity) as GameObject;
             if (childBacteria != null)

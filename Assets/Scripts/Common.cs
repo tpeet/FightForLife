@@ -12,6 +12,9 @@ public class Common : MonoBehaviour
         return (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
     }
 
-
+    public struct Boundary
+    {
+        public float xMin, xMax, yMin, yMax;
+    }
 
 }

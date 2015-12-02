@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 // Instantiates some number of Bacterias, assigns them to random places (inside certain area)
 public class InfectionController : MonoBehaviour
@@ -8,6 +9,8 @@ public class InfectionController : MonoBehaviour
     public GameObject Bacteria;
     public Terrain WorldTerrain;
     public int NumberOfInitialBacterias;
+
+    public List<BacteriaController> ParentBacterias;
 
 	// Use this for initialization
 	void Start ()
@@ -31,6 +34,7 @@ public class InfectionController : MonoBehaviour
 	        {
                 bacteria.GetComponent<BacteriaController>().IsParent = true;
                 bacteria.name = "Bacteria" + (i + 1);
+                ParentBacterias.Add(bacteria.GetComponent<BacteriaController>());
             }
 
 	    }

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+
 public class MouseController : MonoBehaviour
 {
 
@@ -92,9 +93,11 @@ public class MouseController : MonoBehaviour
             }
 
 
-            // mouse click
+            
             if (!UserIsDragging)
             {
+
+
 
                 if (hit.collider.CompareTag("Ground"))
                 {
@@ -103,6 +106,16 @@ public class MouseController : MonoBehaviour
                     //right mousebutton
                     if (Input.GetMouseButtonDown(1))
                     {
+
+                        // enemy highlight
+                        var selectedBacteria = GameObject.Find("GameController")
+                            .GetComponent<InfectionController>()
+                            .ParentBacterias.FirstOrDefault(x => IsPositionInsideArea(CurrentMousePoint, x.GetBacteriaGroupBoundary()));
+
+                        if (selectedBacteria != null)
+                            Debug.Log("Highlight: " + selectedBacteria.name);
+
+
                         RightClickPoint = hit.point;
                         var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
                         if (targetObj != null)
@@ -318,6 +331,11 @@ public class MouseController : MonoBehaviour
     }
 
 
+    public static bool IsPositionInsideArea(Vector3 pos, Common.Boundary boundary)
+    {
+        var value = (pos.x > boundary.xMin && pos.x < boundary.xMax && pos.z < boundary.yMax && pos.z >boundary.yMin);
+        return value;
+    }
 
 
     public static bool UnitWithinScreenSpace(Vector2 unitScreenPos)
@@ -326,10 +344,12 @@ public class MouseController : MonoBehaviour
                unitScreenPos.y > 0;
     }
 
+
+
     public bool IsUnitInsideDrag(Vector2 unitScreenPos)
     {
         var value = unitScreenPos.x > BoxStart.x && unitScreenPos.y < BoxStart.y && unitScreenPos.x < BoxFinish.x && unitScreenPos.y > BoxFinish.y;
-        Debug.Log(String.Format("{6} -> BoxStart ({0},{1}); BoxFinish ({2},{3}) unitScreenPos ({4},{5})", BoxStart.x, BoxStart.y, BoxFinish.x, BoxFinish.y, unitScreenPos.x, unitScreenPos.y, value));
+        //Debug.Log(String.Format("{6} -> BoxStart ({0},{1}); BoxFinish ({2},{3}) unitScreenPos ({4},{5})", BoxStart.x, BoxStart.y, BoxFinish.x, BoxFinish.y, unitScreenPos.x, unitScreenPos.y, value));
 
         return value;
     }
