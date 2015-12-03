@@ -108,18 +108,37 @@ public class MouseController : MonoBehaviour
                     {
 
                         // enemy highlight
-                        var selectedBacteria = GameObject.Find("GameController")
+                        var selectedBacteriaController = GameObject.Find("GameController")
                             .GetComponent<InfectionController>()
                             .ParentBacterias.FirstOrDefault(x => IsPositionInsideArea(CurrentMousePoint, x.GetBacteriaGroupBoundary()));
 
-                        if (selectedBacteria != null)
-                            Debug.Log("Highlight: " + selectedBacteria.name);
 
+                        // if right clicked on a group of bacteria to attack them
+                        if (selectedBacteriaController != null)
+                        {
+                            foreach (var unit in CurrentlySelectedUnits)
+                            {
+                                var controller = unit.GetComponent<UnitController>();
+                                controller.BacteriaToAttack = selectedBacteriaController;
+                            }
+                            Debug.Log("Highlight: " + selectedBacteriaController.name);
+                        }
 
+                        // if click was somewhere else on the terrain
+                        else
+                        {
+                            // reset attack mode
+                            foreach (var macrophage in GameObject.FindGameObjectsWithTag("Macrophage"))
+                                macrophage.GetComponent<UnitController>().BacteriaToAttack = null;
+
+                            var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
+                            if (targetObj != null)
+                                targetObj.name = "Target (Instantiated)";
+                        }
+
+                        // used by characters to seek for a target
                         RightClickPoint = hit.point;
-                        var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
-                        if (targetObj != null)
-                            targetObj.name = "Target (Instantiated)";
+
                     }
 
                     // left mousebutton
