@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class ScoreController : MonoBehaviour
 {
-    public int maxHealth = 100;
+    public int maxHealth = 1000;
+    public int maxResources = 100;
 
     private int _currentOverallHealth;
 
@@ -15,6 +16,18 @@ public class ScoreController : MonoBehaviour
         set
         {
             _currentOverallHealth = value;
+            HandleHealth();
+        }
+    }
+
+    private int _currentResources;
+    
+    public int CurrentResources
+    {
+        get { return _currentResources; }
+        set
+        {
+            _currentResources = value;
             HandleHealth();
         }
     }

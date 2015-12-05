@@ -36,7 +36,6 @@ public class UnitController : MonoBehaviour
                 StartCoroutine(SeekPath());
             else
                 StopCoroutine(SeekPath());
-           
         }
     }
 
@@ -98,8 +97,6 @@ public class UnitController : MonoBehaviour
 	    }
 
 
-
-
         // moves unit towards the target
         if (Path == null || CurrentWaypoint >= Path.vectorPath.Count || !Unit.IsWalkable)
             return;
@@ -118,7 +115,7 @@ public class UnitController : MonoBehaviour
     {
         if (Seeker.IsDone())
             Seeker.StartPath(transform.position, BacteriaToAttack.transform.position, OnPathComplete);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
     }
 
 
@@ -136,5 +133,7 @@ public class UnitController : MonoBehaviour
             Path = p;
             CurrentWaypoint = 0;
         }
+
+        
     }
 }
