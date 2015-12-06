@@ -32,10 +32,10 @@ public class UnitController : MonoBehaviour
         set
         {
             _bacteriaController = value;
-            if (value != null)
-                StartCoroutine(SeekPath());
-            else
-                StopCoroutine(SeekPath());
+            //if (value != null)
+            //    StartCoroutine(SeekPath());
+            //else
+            //    StopCoroutine(SeekPath());
         }
     }
 
@@ -62,7 +62,7 @@ public class UnitController : MonoBehaviour
             }
         }
 
-        
+
 
         // if our unit is currently attacking some bacteria
         if (BacteriaToAttack != null && Seeker.IsDone())
@@ -116,6 +116,7 @@ public class UnitController : MonoBehaviour
         if (Seeker.IsDone())
             Seeker.StartPath(transform.position, BacteriaToAttack.transform.position, OnPathComplete);
         yield return new WaitForSeconds(1f);
+       
     }
 
 

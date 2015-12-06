@@ -11,6 +11,8 @@ public class BacteriaController : MonoBehaviour
     public bool IsParent = false;
     public int BacteriaGenerationTime;
     public int MaxNumberOfBacterias;
+    public int MaxHealthOfParent = 20;
+    public int CurrentHealth = 20;
     
     public GameObject ParentBacteria;
 
@@ -66,6 +68,15 @@ public class BacteriaController : MonoBehaviour
 
     void Update()
     {
+        if (CurrentHealth < 0)
+        {
+            GameObject.Find("GameController")
+                .GetComponent<InfectionController>()
+                .ParentBacterias.Remove(this);
+            Destroy(gameObject);
+            return;
+        }
+            
         if (Path == null || _currentWaypoint >= Path.vectorPath.Count)
             return;
         var rb = GetComponent<Rigidbody>();

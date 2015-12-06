@@ -57,7 +57,7 @@ public class ScoreController : MonoBehaviour
     // Repair variables
     private Button _repairButton;
     public int RepairBonus = 20;
-    public int RepairResources = 30;
+    public int RepairCost = 30;
 
     // Neutrophil variables
     private Button _neutrophilButton;
@@ -71,6 +71,12 @@ public class ScoreController : MonoBehaviour
 
     void Start ()
     {
+        // Buttons init
+        _sweatButton = GameObject.Find("SweatButton").GetComponent<Button>();
+        _repairButton = GameObject.Find("RepairButton").GetComponent<Button>();
+        _healerButton = GameObject.Find("HelperTButton").GetComponent<Button>();
+        _neutrophilButton = GameObject.Find("NeutrophilButton").GetComponent<Button>();
+
         //Healthbar init
         HealthCachedY = HealthTransform.position.y;
         HealthMaxX = HealthTransform.position.x;
@@ -83,28 +89,23 @@ public class ScoreController : MonoBehaviour
         ResourcesMinX = ResourcesTransform.position.x -ResourcesTransform.rect.width;
         CurrentResources = maxResources;
 
-        // Buttons init
-        _sweatButton = GameObject.Find("SweatButton").GetComponent<Button>();
-        _repairButton = GameObject.Find("RepairButton").GetComponent<Button>();
-        _healerButton = GameObject.Find("HelperTButton").GetComponent<Button>();
-        _neutrophilButton = GameObject.Find("NeutrophilButton").GetComponent<Button>();
-
         OnCoolDown = false;
     }
 
     public void Repair()
     {
-        CurrentResources -= 5;
+        CurrentResources -= RepairCost;
+        GameObject.Find("WallContainer").GetComponent<WallController>().CurrentHealth += 30;
     }
 
     public void CreateHealer()
     {
-        
+        CurrentResources -= HealerCost;
     }
 
     public void CreateNeutrophil()
     {
-        
+        CurrentResources -= NeutrophilCost;
     }
 	
 	// Update is called once per frame
@@ -183,6 +184,12 @@ public class ScoreController : MonoBehaviour
             var greenChannelValue = MapHealthBarValues(CurrentResources, 0, maxResources / 2, 0, 255);
             VisualResources.color = new Color32(255, (byte)greenChannelValue, 0, 255);
         }
+
+        // enable or disable the buttons depending if body has enough resources
+        _healerButton.interactable = CurrentResources > HealerCost;
+        _neutrophilButton.interactable = CurrentResources > NeutrophilCost;
+        _repairButton.interactable = CurrentResources > RepairCost;
+
     }
 
     #endregion

@@ -9,12 +9,13 @@ public class InfectionController : MonoBehaviour
     public GameObject Bacteria;
     public Terrain WorldTerrain;
     public int NumberOfInitialBacterias;
-
+    public bool IsBacteriaGenerationEnabled;
     public List<BacteriaController> ParentBacterias;
 
 	// Use this for initialization
 	void Start ()
 	{
+	    if (!IsBacteriaGenerationEnabled) return;
 	    var terrainWidth = WorldTerrain.terrainData.size.x;
 	    var terrainLength = WorldTerrain.terrainData.size.z;
 	    for (int i = 0; i < NumberOfInitialBacterias; i++)
