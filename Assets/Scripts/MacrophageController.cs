@@ -23,18 +23,12 @@ public class MacrophageController : MonoBehaviour
         set
         {
             _currentHealth = value;
-            if (_currentHealth < 0)
-                Destroy(gameObject);
+            HandleHealth();
         }
     }
 
     private bool _canKill = true;
 
-    // Use this for initialization
-    void Start()
-    {
-
-    }
 
     // Update is called once per frame
     void Update()
@@ -47,7 +41,7 @@ public class MacrophageController : MonoBehaviour
             // find all enemies who are in the bacteria group being attacked and who are not parents. Then choose the first one
             var enemies = GameObject.FindGameObjectsWithTag("Enemy")
                 .Where(x =>
-                    !x.GetComponent<BacteriaController>().IsParent && x.GetComponent<BacteriaController>().ParentBacteria == bacteriaToAttack.gameObject);
+                    x.GetComponent<BacteriaController>() != null && !x.GetComponent<BacteriaController>().IsParent && x.GetComponent<BacteriaController>().ParentBacteria == bacteriaToAttack.gameObject);
             //enemies =
             //    enemies.Where(x => x.GetComponent<BacteriaController>().ParentBacteria == bacteriaToAttack.gameObject);
             var enemy = enemies.FirstOrDefault();
@@ -65,6 +59,16 @@ public class MacrophageController : MonoBehaviour
             CurrentHealth--;
             StartCoroutine(KillingTimeout());
         }
+    }
+
+
+    private void HandleHealth()
+    {
+        if (_currentHealth < 0)
+        {
+            Common.DestroyCharacter(gameObject);            
+        }
+            
     }
 
 

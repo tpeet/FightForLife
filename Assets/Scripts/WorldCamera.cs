@@ -8,7 +8,6 @@ using System.Collections;
  */
 public class WorldCamera : MonoBehaviour {
 
-    [Serializable]
 	public struct BoxLimit 
 	{
 		public float LeftLimit;
@@ -16,8 +15,6 @@ public class WorldCamera : MonoBehaviour {
 		public float TopLimit;
 		public float BottomLimit;
 	}
-
-    
 
 	public static BoxLimit mouseScrollLimits;
 	public static WorldCamera Instance;
@@ -45,10 +42,6 @@ public class WorldCamera : MonoBehaviour {
 
 	void Start () {
         // How far can the camera move?
-        //cameraLimits.LeftLimit = -120f;
-        //cameraLimits.RightLimit = -35f;
-        //cameraLimits.TopLimit = -22f;
-        //cameraLimits.BottomLimit = -150f;
         cameraLimits.LeftLimit = WorldTerrain.transform.position.x + WorldTerrainPadding;
         cameraLimits.RightLimit = WorldTerrain.terrainData.size.x - WorldTerrainPadding;
         cameraLimits.TopLimit = WorldTerrain.terrainData.size.z - WorldTerrainPadding;
@@ -75,10 +68,9 @@ public class WorldCamera : MonoBehaviour {
         // let mouse scroll change FOV
 	    var cameraComp = transform.FindChild("Camera").GetComponent<Camera>();
 	    var fov = cameraComp.fieldOfView;
-	    fov += Input.GetAxis("Mouse ScrollWheel")*zoomSpeed*Time.deltaTime;
+	    fov -= Input.GetAxis("Mouse ScrollWheel")*zoomSpeed*Time.deltaTime;
 	    fov = Mathf.Clamp(fov, MinFOV, MaxFOV);
 	    cameraComp.fieldOfView = fov;
-
 	}
 
 	public bool CheckIfUserCameraInput()
@@ -101,30 +93,16 @@ public class WorldCamera : MonoBehaviour {
 
 		// move by keyboard
 		if (Input.GetKey (KeyCode.W) || (Input.mousePosition.y > (Screen.height - mouseScrollLimits.TopLimit) && MoveByMouse))
-			desiredTranslation += Vector3.forward*moveSpeed;
+			desiredTranslation += Vector3.left*moveSpeed;
 
 		if (Input.GetKey (KeyCode.S) || (Input.mousePosition.y < mouseScrollLimits.BottomLimit && MoveByMouse))
-            desiredTranslation += Vector3.back * moveSpeed;
-
-        if (Input.GetKey (KeyCode.A) || (Input.mousePosition.x < mouseScrollLimits.LeftLimit && MoveByMouse))
-            desiredTranslation += Vector3.left * moveSpeed;
-
-        if (Input.GetKey (KeyCode.D) || (Input.mousePosition.x > (Screen.width - mouseScrollLimits.RightLimit) && MoveByMouse))
             desiredTranslation += Vector3.right * moveSpeed;
 
+        if (Input.GetKey (KeyCode.A) || (Input.mousePosition.x < mouseScrollLimits.LeftLimit && MoveByMouse))
+            desiredTranslation += Vector3.back * moveSpeed;
 
-  //      //move by mouse
-  //      if (Input.mousePosition.x < mouseScrollLimits.LeftLimit && MoveByMouse)
-		//	desiredX = -moveSpeed;
-
-		//if (Input.mousePosition.x > (Screen.width - mouseScrollLimits.RightLimit) && MoveByMouse)
-		//	desiredX = moveSpeed;
-
-		//if (Input.mousePosition.y < mouseScrollLimits.BottomLimit && MoveByMouse)
-		//	desiredZ = -moveSpeed;
-		
-		//if (Input.mousePosition.y > (Screen.height - mouseScrollLimits.TopLimit) && MoveByMouse)
-		//	desiredZ = moveSpeed;
+        if (Input.GetKey (KeyCode.D) || (Input.mousePosition.x > (Screen.width - mouseScrollLimits.RightLimit) && MoveByMouse))
+            desiredTranslation += Vector3.forward * moveSpeed;
 
         return desiredTranslation;
 	}

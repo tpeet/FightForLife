@@ -7,46 +7,34 @@ using Pathfinding;
 public class UnitController : MonoBehaviour
 {
     public Vector2 ScreenPos;
-    private bool OnScreen;
+    private bool _onScreen;
     public bool Selected = false;
     public bool IsWalkable = true;
 
 
 
-    private Seeker Seeker;
-    private CharacterController Controller;
+    private Seeker _seeker;
+    private CharacterController _controller;
     public Path Path;
     public float Speed = 500;
-    private UnitController Unit;
+    private UnitController _unit;
 
     // the max distance from the AI to a waypoint for it to continue to the next waypoint
     public float NextWayPointDistance = 1;
 
     // Current Waypoint
-    private int CurrentWaypoint = 0;
+    private int _currentWaypoint = 0;
 
-    private BacteriaController _bacteriaController;
-    public BacteriaController BacteriaToAttack
-    {
-        get { return _bacteriaController; }
-        set
-        {
-            _bacteriaController = value;
-            //if (value != null)
-            //    StartCoroutine(SeekPath());
-            //else
-            //    StopCoroutine(SeekPath());
-        }
-    }
-
-    
+    public BacteriaController BacteriaToAttack { get; set; }
+    public MacrophageController MacrophageToHeal { get; set; }
+    private bool _checkPathAgain = true;
 
 
     void Start()
     {
-        Seeker = GetComponent<Seeker>();
-        Controller = GetComponent<CharacterController>();
-        Unit = GetComponent<UnitController>();
+        _seeker = GetComponent<Seeker>();
+        _controller = GetComponent<CharacterController>();
+        _unit = GetComponent<UnitController>();
     }
 
 
@@ -54,21 +42,34 @@ public class UnitController : MonoBehaviour
     public void LateUpdate()
     {
 
-        if (Unit.Selected && Unit.IsWalkable)
+        // if our unit is currently attacking some bacteria
+        if (BacteriaToAttack != null && _seeker.IsDone())
+        {
+            _seeker.StartPath(transform.position, BacteriaToAttack.transform.position, OnPathComplete);
+            //StartCoroutine(SeekPath());
+        }
+
+
+        else if (MacrophageToHeal != null && _seeker.IsDone())
+        {
+            _seeker.StartPath(transform.position, MacrophageToHeal.transform.position, OnPathComplete);
+            //StartCoroutine(SeekPath());
+        }
+
+
+
+
+        else if (_unit.Selected && _unit.IsWalkable)
         {
             if (Input.GetMouseButtonDown(1))
             {
-                Seeker.StartPath(transform.position, MouseController.RightClickPoint, OnPathComplete);
+                _seeker.StartPath(transform.position, MouseController.RightClickPoint, OnPathComplete);
             }
         }
 
 
 
-        // if our unit is currently attacking some bacteria
-        if (BacteriaToAttack != null && Seeker.IsDone())
-        {
-            Seeker.StartPath(transform.position, BacteriaToAttack.transform.position, OnPathComplete);
-        }
+
     }
 
     void Update () {
@@ -80,17 +81,17 @@ public class UnitController : MonoBehaviour
 
 	        if (MouseController.UnitWithinScreenSpace(ScreenPos))
 	        {
-	            if (!OnScreen)
+	            if (!_onScreen)
 	            {
 	                MouseController.UnitsOnScreen.Add(this.gameObject);
-	                OnScreen = true;
+	                _onScreen = true;
 	            }
 	            else
 	            {
-	                if (OnScreen)
+	                if (_onScreen)
 	                {
 	                    MouseController.UnitsOnScreen.Remove(this.gameObject);
-	                    OnScreen = false;
+	                    _onScreen = false;
 	                }
 	            }
 	        }
@@ -98,33 +99,26 @@ public class UnitController : MonoBehaviour
 
 
         // moves unit towards the target
-        if (Path == null || CurrentWaypoint >= Path.vectorPath.Count || !Unit.IsWalkable)
+        if (Path == null || _currentWaypoint >= Path.vectorPath.Count || !_unit.IsWalkable)
             return;
 
-        var dir = (Path.vectorPath[CurrentWaypoint] - transform.position).normalized;
+        var dir = (Path.vectorPath[_currentWaypoint] - transform.position).normalized;
         dir *= Speed * Time.deltaTime;
-        Controller.SimpleMove(dir);
-        var distance = Vector3.Distance(transform.position, Path.vectorPath[CurrentWaypoint]);
+        _controller.SimpleMove(dir);
+        var distance = Vector3.Distance(transform.position, Path.vectorPath[_currentWaypoint]);
         if (distance < NextWayPointDistance)
         {
-            CurrentWaypoint++;
+            _currentWaypoint++;
         }
     }
 
+
     IEnumerator SeekPath()
     {
-        if (Seeker.IsDone())
-            Seeker.StartPath(transform.position, BacteriaToAttack.transform.position, OnPathComplete);
-        yield return new WaitForSeconds(1f);
-       
+        _checkPathAgain = false;
+        yield return new WaitForSeconds(0.1f);
+        _checkPathAgain = true;
     }
-
-
-
-
-
-
-
 
 
     public void OnPathComplete(Path p)
@@ -132,7 +126,7 @@ public class UnitController : MonoBehaviour
         if (!p.error)
         {
             Path = p;
-            CurrentWaypoint = 0;
+            _currentWaypoint = 0;
         }
 
         

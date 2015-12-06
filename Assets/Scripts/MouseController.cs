@@ -74,7 +74,6 @@ public class MouseController : MonoBehaviour
                     if (TimeLeftBeforeDeclareDrag <= 0f || IsUserDraggingByPosition(MouseDragStart, Input.mousePosition))
                     {
                         UserIsDragging = true;
-                        Debug.Log("User started dragging");
                     }
 
                 }
@@ -84,7 +83,6 @@ public class MouseController : MonoBehaviour
             {
                 if (UserIsDragging)
                 {
-                    Debug.Log("User finished dragging");
                     FinishedDragOnThisFrame = true;
                 }
 
@@ -93,7 +91,7 @@ public class MouseController : MonoBehaviour
             }
 
 
-            
+            var isOnlyHealerSelected = CurrentlySelectedUnits.Count == 1 && CurrentlySelectedUnits.First().CompareTag("Healer");
             if (!UserIsDragging)
             {
 
@@ -112,14 +110,18 @@ public class MouseController : MonoBehaviour
                             .GetComponent<InfectionController>()
                             .ParentBacterias.FirstOrDefault(x => IsPositionInsideArea(CurrentMousePoint, x.GetBacteriaGroupBoundary()));
 
+                      
 
                         // if right clicked on a group of bacteria to attack them
-                        if (selectedBacteriaController != null)
+                        if (selectedBacteriaController != null && !isOnlyHealerSelected)
                         {
                             foreach (var unit in CurrentlySelectedUnits)
                             {
-                                var controller = unit.GetComponent<UnitController>();
-                                controller.BacteriaToAttack = selectedBacteriaController;
+                                if (!unit.CompareTag("Healer"))
+                                {
+                                    var controller = unit.GetComponent<UnitController>();
+                                    controller.BacteriaToAttack = selectedBacteriaController;
+                                }
                             }
                             Debug.Log("Highlight: " + selectedBacteriaController.name);
                         }
@@ -128,8 +130,13 @@ public class MouseController : MonoBehaviour
                         else
                         {
                             // reset attack mode
-                            foreach (var macrophage in GameObject.FindGameObjectsWithTag("Macrophage"))
-                                macrophage.GetComponent<UnitController>().BacteriaToAttack = null;
+                            var allCharacters = Common.GetAllPlayerCharacters();
+                            foreach (var character in allCharacters.Where(x => CurrentlySelectedUnits.Contains(x)))
+                            {
+                                character.GetComponent<UnitController>().BacteriaToAttack = null;
+                                character.GetComponent<UnitController>().MacrophageToHeal = null;
+                            }
+                                
 
                             var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
                             if (targetObj != null)
@@ -189,6 +196,12 @@ public class MouseController : MonoBehaviour
                             DeselectGameobjectsIfSelected();
                     }
 
+
+                    if (Input.GetMouseButtonUp(0) && isOnlyHealerSelected && hitGameObject.CompareTag("Macrophage"))
+                    {
+                        CurrentlySelectedUnits.First().GetComponent<UnitController>().MacrophageToHeal =
+                            hitGameObject.GetComponent<MacrophageController>();
+                    }
                 }
             }
             else

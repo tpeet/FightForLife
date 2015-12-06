@@ -39,7 +39,17 @@ public class WallController : MonoBehaviour
         if (other.gameObject.layer == 12)
         {
             //GameObject.Find("GameController").gameObject.GetComponent<ScoreController>().CurrentOverallHealth--;
-            CurrentHealth--;
+            var bacteriaController = other.gameObject.GetComponent<BacteriaController>();
+            if (bacteriaController != null && bacteriaController.IsParent)
+            {
+                CurrentHealth -= bacteriaController.CurrentHealth;
+                GameObject.Find("GameController")
+                    .GetComponent<InfectionController>()
+                    .ParentBacterias.Remove(bacteriaController);
+            }
+                
+            else { }             
+                CurrentHealth--;
             Destroy(other.gameObject);
         }
 

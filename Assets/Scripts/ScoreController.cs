@@ -1,6 +1,7 @@
-﻿using System;
+﻿//using System;
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 using UnityEngine.UI;
 
 public class ScoreController : MonoBehaviour
@@ -67,7 +68,14 @@ public class ScoreController : MonoBehaviour
     private Button _healerButton;
     public int HealerCost = 10;
 
+    // Macrophage variables
+    private Button _macrophageButton;
+    public int MacrophageCost = 10;
 
+
+    public GameObject Macrophage;
+    public GameObject Neutrophil;
+    public GameObject Healer;
 
     void Start ()
     {
@@ -76,6 +84,7 @@ public class ScoreController : MonoBehaviour
         _repairButton = GameObject.Find("RepairButton").GetComponent<Button>();
         _healerButton = GameObject.Find("HelperTButton").GetComponent<Button>();
         _neutrophilButton = GameObject.Find("NeutrophilButton").GetComponent<Button>();
+        _macrophageButton = GameObject.Find("MacrophageButton").GetComponent<Button>();
 
         //Healthbar init
         HealthCachedY = HealthTransform.position.y;
@@ -100,12 +109,47 @@ public class ScoreController : MonoBehaviour
 
     public void CreateHealer()
     {
+        CreateCharacter(Healer, "HelperT");
         CurrentResources -= HealerCost;
     }
 
     public void CreateNeutrophil()
     {
+        CreateCharacter(Neutrophil, "Neutrophil");
         CurrentResources -= NeutrophilCost;
+    }
+
+    public void CreateMacrophage()
+    {
+        CreateCharacter(Macrophage, "Macrophage");
+        CurrentResources -= MacrophageCost;
+    }
+
+    public void CreateCharacter(GameObject character, string name)
+    {
+        var worldTerrain = FindObjectOfType<Terrain>();
+        var terrainWidth = worldTerrain.terrainData.size.x;
+        var terrainLength = worldTerrain.terrainData.size.z;
+        var allowedAreaBeggingX = worldTerrain.GetPosition().x + terrainWidth / 6;
+        var allowedAreaEndingX = worldTerrain.GetPosition().x + 5 * terrainWidth / 6;
+        var allowedAreaBegginingY = worldTerrain.GetPosition().z + (terrainLength / 12);
+        var allowedAreaEndingY = worldTerrain.GetPosition().z + (terrainLength / 4);
+        var positionX = Random.Range(allowedAreaBeggingX, allowedAreaEndingX);
+        var positionZ = Random.Range(allowedAreaBegginingY, allowedAreaEndingY);
+        var positionVector = new Vector3(positionX, 0.5f, positionZ); ;
+        var otherCharacters = Common.GetAllPlayerCharacters();
+
+        // if Macrophage position is too close to other player objects, then generate new positions
+        while (otherCharacters.Any(x => Vector3.Distance(x.transform.position, positionVector) < 5))
+        {
+            positionX = Random.Range(allowedAreaBeggingX, allowedAreaEndingX);
+            positionZ = Random.Range(allowedAreaBegginingY, allowedAreaEndingY);
+            positionVector = new Vector3(positionX, 0.5f, positionZ);
+        }
+
+        var newCharacter = Instantiate(character, positionVector, Quaternion.identity) as GameObject;
+        if (newCharacter != null)
+            newCharacter.name = name;
     }
 	
 	// Update is called once per frame
@@ -189,6 +233,7 @@ public class ScoreController : MonoBehaviour
         _healerButton.interactable = CurrentResources > HealerCost;
         _neutrophilButton.interactable = CurrentResources > NeutrophilCost;
         _repairButton.interactable = CurrentResources > RepairCost;
+        _macrophageButton.interactable = CurrentResources > MacrophageCost;
 
     }
 
