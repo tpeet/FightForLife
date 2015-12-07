@@ -68,6 +68,7 @@ public class MacrophageController : MonoBehaviour
         {
             Common.DestroyCharacter(gameObject);            
         }
+        Debug.Log("Macrophage health: " + CurrentHealth);
             
     }
 

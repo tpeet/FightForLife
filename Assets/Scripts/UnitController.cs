@@ -28,13 +28,14 @@ public class UnitController : MonoBehaviour
     public BacteriaController BacteriaToAttack { get; set; }
     public MacrophageController MacrophageToHeal { get; set; }
     private bool _checkPathAgain = true;
-
+    private AIPath _aiPath;
 
     void Start()
     {
         _seeker = GetComponent<Seeker>();
         _controller = GetComponent<CharacterController>();
         _unit = GetComponent<UnitController>();
+        _aiPath = GetComponent<AIPath>();
     }
 
 
@@ -45,15 +46,20 @@ public class UnitController : MonoBehaviour
         // if our unit is currently attacking some bacteria
         if (BacteriaToAttack != null && _seeker.IsDone())
         {
-            _seeker.StartPath(transform.position, BacteriaToAttack.transform.position, OnPathComplete);
+            _aiPath.target = BacteriaToAttack.transform;
+            _aiPath.SearchPath();
+            //_seeker.StartPath(transform.position, BacteriaToAttack.transform.position, OnPathComplete);
             //StartCoroutine(SeekPath());
         }
 
 
         else if (MacrophageToHeal != null && _seeker.IsDone())
         {
-            _seeker.StartPath(transform.position, MacrophageToHeal.transform.position, OnPathComplete);
+            _aiPath.target = MacrophageToHeal.transform;
+            _aiPath.SearchPath();
+            //_seeker.StartPath(transform.position, MacrophageToHeal.transform.position, OnPathComplete);
             //StartCoroutine(SeekPath());
+
         }
 
 
@@ -99,7 +105,7 @@ public class UnitController : MonoBehaviour
 
 
         // moves unit towards the target
-        if (Path == null || _currentWaypoint >= Path.vectorPath.Count || !_unit.IsWalkable)
+        if (Path == null || Path.vectorPath == null || _currentWaypoint >= Path.vectorPath.Count || !_unit.IsWalkable || MacrophageToHeal != null)
             return;
 
         var dir = (Path.vectorPath[_currentWaypoint] - transform.position).normalized;

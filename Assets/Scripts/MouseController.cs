@@ -197,10 +197,12 @@ public class MouseController : MonoBehaviour
                     }
 
 
-                    if (Input.GetMouseButtonUp(0) && isOnlyHealerSelected && hitGameObject.CompareTag("Macrophage"))
+                    if (Input.GetMouseButtonUp(1) && isOnlyHealerSelected && hitGameObject.CompareTag("Macrophage"))
                     {
-                        CurrentlySelectedUnits.First().GetComponent<UnitController>().MacrophageToHeal =
+                        var healer = CurrentlySelectedUnits.First();
+                        healer.GetComponent<UnitController>().MacrophageToHeal =
                             hitGameObject.GetComponent<MacrophageController>();
+                        
                     }
                 }
             }
