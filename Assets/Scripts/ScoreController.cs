@@ -109,19 +109,19 @@ public class ScoreController : MonoBehaviour
 
     public void CreateHealer()
     {
-        CreateCharacter(Healer, "HelperT");
+        CreateCharacter(Healer, "HealerContainer");
         CurrentResources -= HealerCost;
     }
 
     public void CreateNeutrophil()
     {
-        CreateCharacter(Neutrophil, "Neutrophil");
+        CreateCharacter(Neutrophil, "NeutrophilContainer");
         CurrentResources -= NeutrophilCost;
     }
 
     public void CreateMacrophage()
     {
-        CreateCharacter(Macrophage, "Macrophage");
+        CreateCharacter(Macrophage, "MacrophageContainer");
         CurrentResources -= MacrophageCost;
     }
 
@@ -157,7 +157,9 @@ public class ScoreController : MonoBehaviour
 	    if (!OnCoolDown && CurrentOverallHealth > 0)
 	    {
 	        StartCoroutine(CoolDownDamage());
-	        CurrentOverallHealth -= 1;
+	        CurrentOverallHealth--;
+            if (CurrentResources < maxResources)
+	            CurrentResources++;
 	    }
 	}
 
@@ -194,6 +196,9 @@ public class ScoreController : MonoBehaviour
             var greenChannelValue = MapHealthBarValues(CurrentOverallHealth, 0, maxHealth/2, 0, 255);
             VisualHealth.color = new Color32(255, (byte) greenChannelValue, 0, 255);
         }
+
+        if (CurrentOverallHealth <= 0)
+            Application.LoadLevel("menu");
     }
 
     private static float MapHealthBarValues(float x, float inMin, float inMax, float outMin, float outMax)

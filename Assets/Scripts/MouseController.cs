@@ -12,7 +12,7 @@ public class MouseController : MonoBehaviour
     RaycastHit hit;
 
     // variables for selecting units
-    public static List<GameObject> CurrentlySelectedUnits = new List<GameObject>();
+    public static List<GameObject> CurrentlySelectedUnits;
     private Vector3 mouseDownPoint;
     public float ClickDragZone = 5f;
 
@@ -36,10 +36,11 @@ public class MouseController : MonoBehaviour
     private Vector2 BoxStart;
     private Vector2 BoxFinish;
 
-    public static List<GameObject> UnitsOnScreen = new List<GameObject>();
-    public static List<GameObject> UnitsInDrag = new List<GameObject>();
+    public static List<GameObject> UnitsOnScreen;
+    public static List<GameObject> UnitsInDrag;
     private bool FinishedDragOnThisFrame;
     private bool StartedDrag;
+
 
 
     // pathfinding
@@ -48,15 +49,29 @@ public class MouseController : MonoBehaviour
     #endregion
 
 
+
+    void Start()
+    {
+        CurrentlySelectedUnits = new List<GameObject>();
+        UnitsOnScreen = new List<GameObject>();
+        UnitsInDrag = new List<GameObject>();
+        UserIsDragging = false;
+        TimeLeftBeforeDeclareDrag = 0;
+    }
+
     void Update()
     {
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity))
         {
+
             var hitGameObject = hit.collider.gameObject;
             CurrentMousePoint = hit.point;
 
+            GameObject.Find("GameController")
+                        .GetComponent<InfectionController>()
+                        .ParentBacterias.ForEach(x => x.transform.GetChild(0).FindChild("BacteriaProjector").gameObject.SetActive(false));
 
             // Mouse dragging
             if (Input.GetMouseButtonDown(0))
@@ -91,7 +106,6 @@ public class MouseController : MonoBehaviour
             }
 
 
-            var isOnlyHealerSelected = CurrentlySelectedUnits.Count == 1 && CurrentlySelectedUnits.First().CompareTag("Healer");
             if (!UserIsDragging)
             {
 
@@ -101,27 +115,27 @@ public class MouseController : MonoBehaviour
                 {
                     target.transform.position = hit.point;
 
+                    
+                    // enemy highlight
+                    var selectedBacteriaController = GameObject.Find("GameController")
+                        .GetComponent<InfectionController>()
+                        .ParentBacterias.FirstOrDefault(x => Vector3.Distance(CurrentMousePoint, x.transform.position) < x.GetBacteriaGroupRadius());
+                    if (selectedBacteriaController != null)
+                    {
+                        selectedBacteriaController.transform.GetChild(0).FindChild("BacteriaProjector").gameObject.SetActive(true);
+                    }
+
                     //right mousebutton
                     if (Input.GetMouseButtonDown(1))
                     {
-
-                        // enemy highlight
-                        var selectedBacteriaController = GameObject.Find("GameController")
-                            .GetComponent<InfectionController>()
-                            .ParentBacterias.FirstOrDefault(x => IsPositionInsideArea(CurrentMousePoint, x.GetBacteriaGroupBoundary()));
-
-                      
-
                         // if right clicked on a group of bacteria to attack them
-                        if (selectedBacteriaController != null && !isOnlyHealerSelected)
+                        if (selectedBacteriaController != null)
                         {
                             foreach (var unit in CurrentlySelectedUnits)
                             {
-                                if (!unit.CompareTag("Healer"))
-                                {
                                     var controller = unit.GetComponent<UnitController>();
                                     controller.BacteriaToAttack = selectedBacteriaController;
-                                }
+
                             }
                             Debug.Log("Highlight: " + selectedBacteriaController.name);
                         }
@@ -134,13 +148,16 @@ public class MouseController : MonoBehaviour
                             foreach (var character in allCharacters.Where(x => CurrentlySelectedUnits.Contains(x)))
                             {
                                 character.GetComponent<UnitController>().BacteriaToAttack = null;
-                                character.GetComponent<UnitController>().MacrophageToHeal = null;
                             }
-                                
 
-                            var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
-                            if (targetObj != null)
-                                targetObj.name = "Target (Instantiated)";
+                            if (CurrentlySelectedUnits.Any())
+                            {
+                                var targetObj = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
+                                if (targetObj != null)
+                                    targetObj.name = "Target (Instantiated)";
+                                CurrentlySelectedUnits.ForEach(x => x.GetComponent<UnitController>().Target = targetObj);
+                            }
+
                         }
 
                         // used by characters to seek for a target
@@ -171,7 +188,7 @@ public class MouseController : MonoBehaviour
                                     DeselectGameobjectsIfSelected();
 
                                 // add unit to currently selected list
-                                hit.collider.transform.FindChild("Selected").gameObject.SetActive(true);
+                                hit.collider.transform.GetChild(0).FindChild("Selected").gameObject.SetActive(true);
                                 CurrentlySelectedUnits.Add(hitGameObject);
 
                                 hit.collider.gameObject.GetComponent<UnitController>().Selected = true;
@@ -186,7 +203,7 @@ public class MouseController : MonoBehaviour
                                 else
                                 {
                                     DeselectGameobjectsIfSelected();
-                                    hit.collider.transform.FindChild("Selected").gameObject.SetActive(true);
+                                    hit.collider.transform.GetChild(0).FindChild("Selected").gameObject.SetActive(true);
                                     CurrentlySelectedUnits.Add(hitGameObject);
                                     hit.collider.gameObject.GetComponent<UnitController>().Selected = true;
                                 }
@@ -194,15 +211,6 @@ public class MouseController : MonoBehaviour
                         }
                         else if (!Common.ShiftKeyDown())
                             DeselectGameobjectsIfSelected();
-                    }
-
-
-                    if (Input.GetMouseButtonUp(1) && isOnlyHealerSelected && hitGameObject.CompareTag("Macrophage"))
-                    {
-                        var healer = CurrentlySelectedUnits.First();
-                        healer.GetComponent<UnitController>().MacrophageToHeal =
-                            hitGameObject.GetComponent<MacrophageController>();
-                        
                     }
                 }
             }
@@ -262,7 +270,7 @@ public class MouseController : MonoBehaviour
             foreach (var unitObj in UnitsOnScreen)
             {
                 var unitScript = unitObj.GetComponent<UnitController>();
-                var selectedObj = unitObj.transform.FindChild("Selected").gameObject;
+                var selectedObj = unitObj.transform.GetChild(0).FindChild("Selected").gameObject;
 
                 if (!UnitsInDrag.Contains(unitObj))
                 {
@@ -336,7 +344,7 @@ public class MouseController : MonoBehaviour
         {
             foreach (var listUnit in CurrentlySelectedUnits)
             {
-                listUnit.transform.FindChild("Selected").gameObject.SetActive(false);
+                listUnit.transform.GetChild(0).FindChild("Selected").gameObject.SetActive(false);
                 listUnit.GetComponent<UnitController>().Selected = false;
             }
 
@@ -355,7 +363,7 @@ public class MouseController : MonoBehaviour
                 if (currentlySelectedUnit == unit)
                 {
                     CurrentlySelectedUnits.RemoveAt(i);
-                    currentlySelectedUnit.transform.FindChild("Selected").gameObject.SetActive(false);
+                    currentlySelectedUnit.transform.GetChild(0).FindChild("Selected").gameObject.SetActive(false);
                     currentlySelectedUnit.GetComponent<UnitController>().Selected = false;
                 }
 
@@ -396,7 +404,7 @@ public class MouseController : MonoBehaviour
         foreach (var o in unitsInDragNotCurrentlySelected)
         {
             o.GetComponent<UnitController>().Selected = true;
-            o.transform.FindChild("Selected").gameObject.SetActive(true);
+            o.transform.GetChild(0).FindChild("Selected").gameObject.SetActive(true);
         }
             
         CurrentlySelectedUnits.AddRange(unitsInDragNotCurrentlySelected);

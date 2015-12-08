@@ -255,6 +255,8 @@ public class AIPath : MonoBehaviour {
 		//add it here
 		//You can also create a new script which inherits from this one
 		//and override the function in that script
+	    if (GetComponent<UnitController>() != null)
+	        GetComponent<UnitController>().Target = null;
 	}
 
 	/** Called when a requested path has finished calculation.

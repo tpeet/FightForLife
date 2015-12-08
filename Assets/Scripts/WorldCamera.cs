@@ -8,6 +8,7 @@ using System.Collections;
  */
 public class WorldCamera : MonoBehaviour {
 
+    [Serializable]
 	public struct BoxLimit 
 	{
 		public float LeftLimit;
@@ -42,10 +43,16 @@ public class WorldCamera : MonoBehaviour {
 
 	void Start () {
         // How far can the camera move?
-        cameraLimits.LeftLimit = WorldTerrain.transform.position.x + WorldTerrainPadding;
-        cameraLimits.RightLimit = WorldTerrain.terrainData.size.x - WorldTerrainPadding;
-        cameraLimits.TopLimit = WorldTerrain.terrainData.size.z - WorldTerrainPadding;
-        cameraLimits.BottomLimit = WorldTerrain.transform.position.z + WorldTerrainPadding;
+        //cameraLimits.LeftLimit = WorldTerrain.transform.position.x + WorldTerrainPadding;
+        //cameraLimits.RightLimit = WorldTerrain.terrainData.size.x - WorldTerrainPadding;
+        //cameraLimits.TopLimit = WorldTerrain.terrainData.size.z - WorldTerrainPadding;
+        //cameraLimits.BottomLimit = WorldTerrain.transform.position.z + WorldTerrainPadding;
+
+        
+        //cameraLimits.LeftLimit = mouseScrollLimits.LeftLimit;
+        //cameraLimits.RightLimit = mouseScrollLimits.RightLimit;
+        //cameraLimits.TopLimit = mouseScrollLimits.TopLimit;
+        //cameraLimits.BottomLimit = mouseScrollLimits.BottomLimit;
 
         // When does the mouse tell the game to move the camera?
         mouseScrollLimits.LeftLimit = MouseBoundary;
@@ -138,6 +145,14 @@ public class WorldCamera : MonoBehaviour {
 		        (Input.mousePosition.y < mouseScrollLimits.BottomLimit && Input.mousePosition.y > -5) ||
 		        (Input.mousePosition.y > (Screen.height - mouseScrollLimits.TopLimit) && Input.mousePosition.y < (Screen.height+5)));
 	}
+
+
+    public float MapCameraLimits(float coordinate)
+    {
+        var fov = transform.FindChild("Camera").GetComponent<Camera>().fieldOfView;
+
+        return coordinate;
+    }
 	#endregion
 
 }

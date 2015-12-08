@@ -17,10 +17,10 @@ public class NeutrophilController : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         
-        if (DontExplode) return;
+        if (DontExplode || other.gameObject.CompareTag("CharacterChildren") || other.gameObject == gameObject) return;
        
         // if other object is player character or NPC
-        if (other.gameObject != gameObject && (other.gameObject.layer == 8 || other.gameObject.layer == 12))
+        if (other.gameObject.layer == 8 || other.gameObject.layer == 12)
         {
             Explode();
         }

@@ -44,6 +44,7 @@ public class InfectionController : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-	
+	    if (ParentBacterias.Count == 0 && IsBacteriaGenerationEnabled)
+            Application.LoadLevel("menu");
 	}
 }

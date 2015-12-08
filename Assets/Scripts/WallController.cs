@@ -43,14 +43,17 @@ public class WallController : MonoBehaviour
             if (bacteriaController != null && bacteriaController.IsParent)
             {
                 CurrentHealth -= bacteriaController.CurrentHealth;
+                bacteriaController.CurrentHealth -= bacteriaController.MaxHealthOfParent;
                 GameObject.Find("GameController")
                     .GetComponent<InfectionController>()
                     .ParentBacterias.Remove(bacteriaController);
             }
                 
-            else { }             
+            else {
                 CurrentHealth--;
-            Destroy(other.gameObject);
+                Destroy(other.gameObject);
+            }             
+                
         }
 
     }

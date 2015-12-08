@@ -29,41 +29,48 @@ public class HealerController : MonoBehaviour
     private bool _canTakeDamage = true;
 
 
-	void Start ()
-	{
-	    CurrentHealth = MaxHealth;
-	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-        // if there are bacterias near healer reduce health
-	    if (_canTakeDamage && GameObject.FindGameObjectsWithTag("Enemy")
-	            .Any(x => Vector3.Distance(transform.position, x.transform.position) < BacteriaDamageDistance))
-	    {
-            CurrentHealth--;
-	        StartCoroutine(TakeDamage());
-	    }
-	        
+    void Start()
+    {
+        CurrentHealth = MaxHealth;
+    }
 
-	    if (_canHeal)
-	    {
+    // Update is called once per frame
+    void Update()
+    {
+        // if there are bacterias near healer reduce health
+        if (_canTakeDamage && GameObject.FindGameObjectsWithTag("Enemy")
+                .Any(x => Vector3.Distance(transform.position, x.transform.position) < BacteriaDamageDistance))
+        {
+            CurrentHealth--;
+            StartCoroutine(TakeDamage());
+        }
+
+
+        if (_canHeal)
+        {
             var unitController = GetComponent<UnitController>();
-            MacrophageController macrophageController = null;
-            if (unitController != null)
-                macrophageController = unitController.MacrophageToHeal;
-	        if (macrophageController != null &&
-	            Vector3.Distance(transform.position, macrophageController.transform.position) < HealingDistance)
-	        {
+
+            // selects macrophage which is: 
+            //  * attacking the same bacteria as the healer,
+            //  * with the distance close enough,
+            //  * with the lowest health
+            var macrophage = GameObject.FindGameObjectsWithTag("Macrophage").
+                Where(x => /*x.GetComponent<UnitController>().BacteriaToAttack == unitController.BacteriaToAttack &&*/ Vector3.Distance(x.transform.position, transform.position) < HealingDistance).
+                OrderBy(x => x.GetComponent<MacrophageController>().CurrentHealth).FirstOrDefault();
+            //BacteriaController macrophageController = null;
+            //if (unitController != null)
+            //    macrophageController = unitController.MacrophageToHeal;
+            if (macrophage != null)
+            {
                 StartCoroutine(Heal());
-	            macrophageController.CurrentHealth++;
-	            CurrentHealth--;
-	        }
-                
+                macrophage.GetComponent<MacrophageController>().CurrentHealth++;
+                CurrentHealth--;
+            }
+
 
         }
-	    
-	}
+
+    }
 
     IEnumerator TakeDamage()
     {
@@ -83,6 +90,6 @@ public class HealerController : MonoBehaviour
     public void HandleHealth()
     {
         if (CurrentHealth < 0)
-            Destroy(gameObject);
+            Common.DestroyCharacter(gameObject);
     }
 }

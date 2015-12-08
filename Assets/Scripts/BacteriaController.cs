@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 using Random = UnityEngine.Random;
 using Pathfinding;
 
@@ -59,7 +60,7 @@ public class BacteriaController : MonoBehaviour
             Target = parentBacteriaController.Target - locationDifference;
             //Target.z = Mathf.Clamp(Target.x, _terrain.GetPosition().z + 5,
             //    _terrain.GetPosition().z + _terrain.terrainData.size.z);
-
+            Destroy(transform.GetChild(0).FindChild("BacteriaProjector").gameObject);
 
 
         }
@@ -74,6 +75,10 @@ public class BacteriaController : MonoBehaviour
                 .GetComponent<InfectionController>()
                 .ParentBacterias.Remove(this);
             Destroy(gameObject);
+            foreach (var child in GameObject.FindGameObjectsWithTag("Enemy").Where(x => x.GetComponent<BacteriaController>().ParentBacteria == gameObject))
+            {
+                Destroy(child);
+            }
             return;
         }
             
@@ -90,19 +95,17 @@ public class BacteriaController : MonoBehaviour
         }
 
 
+        //var bacteriaProjector = transform.GetChild(0).FindChild("BacteriaProjector").gameObject;
+        //if (!IsParent && bacteriaProjector.activeInHierarchy)
+        //    bacteriaProjector.SetActive(false);
     }
 
-    // defines the limits for selecting each group of bacteria by mouse
-    public Common.Boundary GetBacteriaGroupBoundary()
+
+    public float GetBacteriaGroupRadius()
     {
-        Common.Boundary groupBoundary;
-        groupBoundary.xMin = (-1) * (_terrainSize.x / (_numberOfInitialBacterias * 4)) + transform.position.x;
-        groupBoundary.xMax = (_terrainSize.x / (_numberOfInitialBacterias * 4)) + transform.position.x;
-        groupBoundary.yMin = (-1)*(_terrainSize.z / (_numberOfInitialBacterias * 4)) + transform.position.z;
-        groupBoundary.yMax = (_terrainSize.z / (_numberOfInitialBacterias * 4)) + transform.position.z;
-        return groupBoundary;
+        return (-1) * (_terrainSize.x / (_numberOfInitialBacterias * 4)) + transform.position.x;
     }
-
+        
 
     public void OnPathComplete(Path p)
     {
