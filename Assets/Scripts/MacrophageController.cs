@@ -28,6 +28,12 @@ public class MacrophageController : MonoBehaviour
     }
 
     private bool _canKill = true;
+    public Material Selector;
+
+    void Start()
+    {
+        CurrentHealth = MaxHealth;
+    }
 
 
     // Update is called once per frame
@@ -68,6 +74,36 @@ public class MacrophageController : MonoBehaviour
         {
             Common.DestroyCharacter(gameObject);            
         }
+
+        var child = transform.GetChild(0);
+        if (child.childCount > 0 && child.GetChild(0).gameObject.activeSelf)
+        {
+            // more than 50% health
+            if (CurrentHealth > MaxHealth / 2)
+            {
+                var redChannelValue = Common.MapValues(CurrentHealth, MaxHealth / 2.0f, MaxHealth, 255, 0);
+
+                var projector = child.GetComponentInChildren<Projector>();
+                var newMaterial = new Material(Selector)
+                {
+                    color = new Color32((byte)redChannelValue, 255, 0, 255)
+            };
+                projector.material = newMaterial;
+            }
+
+            //less than 50% health
+            else
+            {
+                var greenChannelValue = Common.MapValues(CurrentHealth, 0, MaxHealth / 2.0f, 0, 255);
+                var projector = child.GetComponentInChildren<Projector>();
+                var newMaterial = new Material(Selector)
+                {
+                    color = new Color32(255, (byte) greenChannelValue, 0, 255)
+                };
+                projector.material = newMaterial;
+            }
+        }
+
         Debug.Log("Macrophage health: " + CurrentHealth);
             
     }

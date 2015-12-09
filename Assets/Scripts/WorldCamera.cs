@@ -63,7 +63,7 @@ public class WorldCamera : MonoBehaviour {
 
 
 	void Update () {
-		if (CheckIfUserCameraInput())
+		if (CheckIfUserCameraInput()) 
 		{
 			var desiredTranslation = GetDesiredTranslation();
 
@@ -78,6 +78,7 @@ public class WorldCamera : MonoBehaviour {
 	    fov -= Input.GetAxis("Mouse ScrollWheel")*zoomSpeed*Time.deltaTime;
 	    fov = Mathf.Clamp(fov, MinFOV, MaxFOV);
 	    cameraComp.fieldOfView = fov;
+	    cameraComp.orthographicSize = fov/2;
 	}
 
 	public bool CheckIfUserCameraInput()
@@ -146,13 +147,6 @@ public class WorldCamera : MonoBehaviour {
 		        (Input.mousePosition.y > (Screen.height - mouseScrollLimits.TopLimit) && Input.mousePosition.y < (Screen.height+5)));
 	}
 
-
-    public float MapCameraLimits(float coordinate)
-    {
-        var fov = transform.FindChild("Camera").GetComponent<Camera>().fieldOfView;
-
-        return coordinate;
-    }
 	#endregion
 
 }

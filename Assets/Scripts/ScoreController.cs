@@ -127,7 +127,7 @@ public class ScoreController : MonoBehaviour
 
     public void CreateCharacter(GameObject character, string name)
     {
-        var worldTerrain = FindObjectOfType<Terrain>();
+        var worldTerrain = FindObjectsOfType<Terrain>().FirstOrDefault(x => x.name == "Terrain"); ;
         var terrainWidth = worldTerrain.terrainData.size.x;
         var terrainLength = worldTerrain.terrainData.size.z;
         var allowedAreaBeggingX = worldTerrain.GetPosition().x + terrainWidth / 6;
@@ -180,20 +180,20 @@ public class ScoreController : MonoBehaviour
     private void HandleHealth()
     {
         HealthText.text = "Health: " + CurrentOverallHealth;
-        var currentX = MapHealthBarValues(CurrentOverallHealth, 0, maxHealth, HealthMinX, HealthMaxX);
+        var currentX = Common.MapValues(CurrentOverallHealth, 0, maxHealth, HealthMinX, HealthMaxX);
         HealthTransform.position = new Vector3(currentX, HealthCachedY);
 
         // more than 50% health
         if (CurrentOverallHealth > maxHealth/2)
         {
-            var redChannelValue = MapHealthBarValues(CurrentOverallHealth, maxHealth/2, maxHealth, 255, 0);
+            var redChannelValue = Common.MapValues(CurrentOverallHealth, maxHealth/2.0f, maxHealth, 255, 0);
             VisualHealth.color = new Color32((byte) redChannelValue, 255, 0, 255);
         }
 
         //less than 50% health
         else
         {
-            var greenChannelValue = MapHealthBarValues(CurrentOverallHealth, 0, maxHealth/2, 0, 255);
+            var greenChannelValue = Common.MapValues(CurrentOverallHealth, 0, maxHealth/2.0f, 0, 255);
             VisualHealth.color = new Color32(255, (byte) greenChannelValue, 0, 255);
         }
 
@@ -201,10 +201,7 @@ public class ScoreController : MonoBehaviour
             Application.LoadLevel("menu");
     }
 
-    private static float MapHealthBarValues(float x, float inMin, float inMax, float outMin, float outMax)
-    {
-        return (x - inMin)*(outMax - outMin)/(inMax - inMin) + outMin;
-    }
+
 
     #endregion
 
@@ -217,20 +214,20 @@ public class ScoreController : MonoBehaviour
     private void HandleResources()
     {
         ResourcesText.text = "Resources: " + CurrentResources;
-        var currentX = MapHealthBarValues(CurrentResources, 0, maxResources, ResourcesMaxX, ResourcesMinX) + ResourcesTransform.rect.width;
+        var currentX = Common.MapValues(CurrentResources, 0, maxResources, ResourcesMaxX, ResourcesMinX) + ResourcesTransform.rect.width;
         ResourcesTransform.position = new Vector3(currentX, ResourcesCachedY);
 
         // more than 50% health
         if (CurrentResources > maxResources / 2)
         {
-            var redChannelValue = MapHealthBarValues(CurrentResources, maxResources / 2, maxResources, 255, 0);
+            var redChannelValue = Common.MapValues(CurrentResources, maxResources / 2.0f, maxResources, 255, 0);
             VisualResources.color = new Color32((byte)redChannelValue, 255, 0, 255);
         }
 
         //less than 50% health
         else
         {
-            var greenChannelValue = MapHealthBarValues(CurrentResources, 0, maxResources / 2, 0, 255);
+            var greenChannelValue = Common.MapValues(CurrentResources, 0, maxResources / 2.0f, 0, 255);
             VisualResources.color = new Color32(255, (byte)greenChannelValue, 0, 255);
         }
 
@@ -270,5 +267,4 @@ public class ScoreController : MonoBehaviour
 
 
     #endregion
-
 }

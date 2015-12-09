@@ -30,7 +30,6 @@ public class UnitController : MonoBehaviour
 
 
     private Seeker _seeker;
-    private CharacterController _controller;
     public Path Path;
     public float Speed = 500;
     private UnitController _unit;
@@ -62,7 +61,6 @@ public class UnitController : MonoBehaviour
     void Start()
     {
         _seeker = GetComponent<Seeker>();
-        _controller = GetComponent<CharacterController>();
         _unit = GetComponent<UnitController>();
         _aiPath = GetComponent<AIPath>();
     }

@@ -109,21 +109,26 @@ public class MouseController : MonoBehaviour
             if (!UserIsDragging)
             {
 
+                // enemy highlight
+                var parentBacterias = GameObject.Find("GameController")
+                    .GetComponent<InfectionController>()
+                    .ParentBacterias;
 
+                var bacteriaGroupRadius = Common.GetBacteriaGroupRadius();
+                var selectedBacteriaController = parentBacterias.FirstOrDefault(x => Vector3.Distance(hit.point, x.transform.position) < bacteriaGroupRadius);
+                if (selectedBacteriaController != null)
+                {
+                    var bacteriaProjector = selectedBacteriaController.transform.GetChild(0).FindChild("BacteriaProjector");
+                    bacteriaProjector.GetComponent<Projector>().orthographicSize = bacteriaGroupRadius * 2;
+                    bacteriaProjector.gameObject.SetActive(true);
+                }
 
                 if (hit.collider.CompareTag("Ground"))
                 {
                     target.transform.position = hit.point;
 
                     
-                    // enemy highlight
-                    var selectedBacteriaController = GameObject.Find("GameController")
-                        .GetComponent<InfectionController>()
-                        .ParentBacterias.FirstOrDefault(x => Vector3.Distance(CurrentMousePoint, x.transform.position) < x.GetBacteriaGroupRadius());
-                    if (selectedBacteriaController != null)
-                    {
-                        selectedBacteriaController.transform.GetChild(0).FindChild("BacteriaProjector").gameObject.SetActive(true);
-                    }
+
 
                     //right mousebutton
                     if (Input.GetMouseButtonDown(1))

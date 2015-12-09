@@ -39,7 +39,7 @@ public class BacteriaController : MonoBehaviour
         _bacteria = gameObject;
         _seeker = GetComponent<Seeker>();
 
-        _terrain = FindObjectOfType<Terrain>();
+        _terrain = FindObjectsOfType<Terrain>().FirstOrDefault(x => x.name == "Terrain");
         _terrainSize = _terrain.terrainData.size;
         _numberOfInitialBacterias = GameObject.Find("GameController").GetComponent<InfectionController>().NumberOfInitialBacterias;
 
@@ -48,7 +48,7 @@ public class BacteriaController : MonoBehaviour
             StartCoroutine(GenerateBacteria());
 
             var targetX = Random.Range(transform.position.x - 5, transform.position.x + 5);
-            var targetZ = GameObject.FindGameObjectWithTag("Finish").transform.position.z - 10;
+            var targetZ = GameObject.FindGameObjectWithTag("Finish").transform.position.z - 25;
             Target = new Vector3(targetX, 0.5f, targetZ);
             
         }
@@ -100,11 +100,6 @@ public class BacteriaController : MonoBehaviour
         //    bacteriaProjector.SetActive(false);
     }
 
-
-    public float GetBacteriaGroupRadius()
-    {
-        return (-1) * (_terrainSize.x / (_numberOfInitialBacterias * 4)) + transform.position.x;
-    }
         
 
     public void OnPathComplete(Path p)

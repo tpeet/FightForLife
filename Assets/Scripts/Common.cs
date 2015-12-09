@@ -8,7 +8,6 @@ public class Common : MonoBehaviour
 
     public static int BacteriaGenerationTime = 1;
 
-
     public static bool ShiftKeyDown()
     {
         return (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
@@ -17,6 +16,14 @@ public class Common : MonoBehaviour
     public struct Boundary
     {
         public float xMin, xMax, yMin, yMax;
+    }
+
+    public static float GetBacteriaGroupRadius()
+    {
+        var terrain = FindObjectsOfType<Terrain>().FirstOrDefault(x => x.name == "Terrain");
+        var terrainSize = terrain.terrainData.size;
+        var numberOfInitialBacterias = GameObject.Find("GameController").GetComponent<InfectionController>().NumberOfInitialBacterias;
+        return terrainSize.x / (numberOfInitialBacterias * 4);
     }
 
     public static void DestroyCharacter(GameObject character)
@@ -34,5 +41,10 @@ public class Common : MonoBehaviour
         allCharacters.AddRange(GameObject.FindGameObjectsWithTag("Neutrophil"));
         allCharacters.AddRange(GameObject.FindGameObjectsWithTag("Healer"));
         return allCharacters;
+    }
+
+    public static float MapValues(float x, float inMin, float inMax, float outMin, float outMax)
+    {
+        return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 }
