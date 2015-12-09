@@ -11,11 +11,12 @@ public class InfectionController : MonoBehaviour
     public int NumberOfInitialBacterias;
     public bool IsBacteriaGenerationEnabled;
     public List<BacteriaController> ParentBacterias;
-
+    private bool _hasWon = false;
 	// Use this for initialization
 	void Start ()
 	{
 	    if (!IsBacteriaGenerationEnabled) return;
+	    NumberOfInitialBacterias = NumberOfInitialBacterias + PlayerPrefs.GetInt("Level");
 	    var terrainWidth = WorldTerrain.terrainData.size.x;
 	    var terrainLength = WorldTerrain.terrainData.size.z;
 	    for (int i = 0; i < NumberOfInitialBacterias; i++)
@@ -44,7 +45,10 @@ public class InfectionController : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-	    if (ParentBacterias.Count == 0 && IsBacteriaGenerationEnabled)
-            Application.LoadLevel("menu");
-	}
+	    if (ParentBacterias.Count == 0 && IsBacteriaGenerationEnabled && !_hasWon)
+	    {
+            ScoreController.GameWon();
+	        _hasWon = true;
+	    }
+    }
 }

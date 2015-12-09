@@ -6,7 +6,7 @@ public class WallController : MonoBehaviour
     public int MaxHealth = 100;
 
     private int _currentHealth = 100;
-
+    private bool _isGameOver = false;
     public int CurrentHealth
     {
         get
@@ -16,8 +16,13 @@ public class WallController : MonoBehaviour
 
         set
         {
+            if (_isGameOver) return;
             if (_currentHealth <= 0)
-                Application.LoadLevel("menu");
+            {
+                ScoreController.GameLost();
+                _isGameOver = true;
+            }
+                
             Debug.Log(_currentHealth);
             _currentHealth = value;
             if (_currentHealth > MaxHealth)

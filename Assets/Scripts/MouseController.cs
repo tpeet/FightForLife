@@ -50,7 +50,7 @@ public class MouseController : MonoBehaviour
 
 
 
-    void Start()
+    void Awake()
     {
         CurrentlySelectedUnits = new List<GameObject>();
         UnitsOnScreen = new List<GameObject>();
@@ -61,6 +61,13 @@ public class MouseController : MonoBehaviour
 
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            var quitPanel = FindObjectsOfType<CanvasGroup>().FirstOrDefault(x => x.name == "QuitPanel");
+            Common.EnableCanvasGroup(quitPanel,1);
+        }
+
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity))
@@ -413,6 +420,18 @@ public class MouseController : MonoBehaviour
         }
             
         CurrentlySelectedUnits.AddRange(unitsInDragNotCurrentlySelected);
+    }
+
+
+    public void QuitToMenu()
+    {
+        Application.LoadLevel("menu");
+    }
+
+    public void QuitCancel()
+    {
+        var quitPanel = FindObjectsOfType<CanvasGroup>().FirstOrDefault(x => x.name == "QuitPanel");
+        Common.DisableCanvasGroup(quitPanel, 0);
     }
 
     #endregion

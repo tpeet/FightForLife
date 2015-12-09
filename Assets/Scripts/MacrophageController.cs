@@ -56,6 +56,7 @@ public class MacrophageController : MonoBehaviour
             if (enemy != null)
             {
                 Destroy(enemy);
+                ScoreController.BacteriasKilledThisLevel++;
                 CurrentHealth--;
             }
             // if we are fighting with the parent bacteria

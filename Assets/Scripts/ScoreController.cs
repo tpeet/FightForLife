@@ -52,7 +52,7 @@ public class ScoreController : MonoBehaviour
 
     // Sweating
     public int SweatHealthBonus = 20;
-    public int SweatTimeout = 30;
+    public int SweatCost = 30;
     private Button _sweatButton;
 
     // Repair variables
@@ -77,8 +77,12 @@ public class ScoreController : MonoBehaviour
     public GameObject Neutrophil;
     public GameObject Healer;
 
+    public static  int BacteriasKilledThisLevel;
+    private bool _hasWon = false;
+
     void Start ()
     {
+        BacteriasKilledThisLevel = 0;
         // Buttons init
         _sweatButton = GameObject.Find("SweatButton").GetComponent<Button>();
         _repairButton = GameObject.Find("RepairButton").GetComponent<Button>();
@@ -175,6 +179,19 @@ public class ScoreController : MonoBehaviour
     }
 
 
+    public static void GameWon()
+    {
+        PlayerPrefs.SetInt("KilledBacteriasThisLevel", BacteriasKilledThisLevel);
+        PlayerPrefs.SetInt("DidWin", 1);
+        Application.LoadLevel("gameOver");
+    }
+
+    public static void GameLost()
+    {
+        PlayerPrefs.SetInt("KilledBacteriasThisLevel", BacteriasKilledThisLevel);
+        PlayerPrefs.SetInt("DidWin", 0);
+        Application.LoadLevel("gameOver");
+    }
 
     #region HealthBar movement
     private void HandleHealth()
@@ -197,8 +214,11 @@ public class ScoreController : MonoBehaviour
             VisualHealth.color = new Color32(255, (byte) greenChannelValue, 0, 255);
         }
 
-        if (CurrentOverallHealth <= 0)
-            Application.LoadLevel("menu");
+        if (CurrentOverallHealth <= 0 && !_hasWon)
+        {
+            GameLost();
+            _hasWon = true;
+        }
     }
 
 
@@ -236,35 +256,19 @@ public class ScoreController : MonoBehaviour
         _neutrophilButton.interactable = CurrentResources > NeutrophilCost;
         _repairButton.interactable = CurrentResources > RepairCost;
         _macrophageButton.interactable = CurrentResources > MacrophageCost;
+        _sweatButton.interactable = CurrentResources > SweatCost;
 
     }
 
     #endregion
 
-
-
-
-
-
-
-    #region Sweating
 
 
     public void Sweat()
     {
         CurrentOverallHealth += SweatHealthBonus;
         CurrentOverallHealth = Mathf.Clamp(CurrentOverallHealth, 0, 100);
-        StartCoroutine(SweatWait());
-
+        CurrentResources -= SweatCost;
     }
 
-    IEnumerator SweatWait()
-    {
-        _sweatButton.interactable = false;
-        yield return new WaitForSeconds(SweatTimeout);
-        _sweatButton.interactable = true;
-    }
-
-
-    #endregion
 }

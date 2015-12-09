@@ -47,4 +47,19 @@ public class Common : MonoBehaviour
     {
         return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
+
+
+    public static void EnableCanvasGroup(CanvasGroup canvasGroup, float alpha)
+    {
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+        canvasGroup.alpha = alpha;
+    }
+
+    public static void DisableCanvasGroup(CanvasGroup canvasGroup, float alpha)
+    {
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.alpha = alpha;
+    }
 }

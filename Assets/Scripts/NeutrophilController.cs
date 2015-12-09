@@ -64,7 +64,10 @@ public class NeutrophilController : MonoBehaviour
             if (bacteriaController.IsParent)
                 bacteriaController.CurrentHealth -= DamageAmount;
             else
+            {
                 Destroy(bacteriaController.gameObject);
+                ScoreController.BacteriasKilledThisLevel++;
+            }
         }
 
         // reduce The Wall health, if too close to it

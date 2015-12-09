@@ -10,7 +10,7 @@ public class BacteriaController : MonoBehaviour
 
 
     public bool IsParent = false;
-    public int BacteriaGenerationTime;
+    public float BacteriaGenerationTime;
     public int MaxNumberOfBacterias;
     public int MaxHealthOfParent = 20;
     public int CurrentHealth = 20;
@@ -42,7 +42,8 @@ public class BacteriaController : MonoBehaviour
         _terrain = FindObjectsOfType<Terrain>().FirstOrDefault(x => x.name == "Terrain");
         _terrainSize = _terrain.terrainData.size;
         _numberOfInitialBacterias = GameObject.Find("GameController").GetComponent<InfectionController>().NumberOfInitialBacterias;
-
+        if (PlayerPrefs.GetInt("Difficulty") > 0)
+            BacteriaGenerationTime = BacteriaGenerationTime / PlayerPrefs.GetInt("Difficulty");
         if (IsParent)
         {
             StartCoroutine(GenerateBacteria());
@@ -50,7 +51,7 @@ public class BacteriaController : MonoBehaviour
             var targetX = Random.Range(transform.position.x - 5, transform.position.x + 5);
             var targetZ = GameObject.FindGameObjectWithTag("Finish").transform.position.z - 25;
             Target = new Vector3(targetX, 0.5f, targetZ);
-            
+            _seeker.StartPath(transform.position, Target, OnPathComplete);
         }
         else
         {
@@ -61,10 +62,11 @@ public class BacteriaController : MonoBehaviour
             //Target.z = Mathf.Clamp(Target.x, _terrain.GetPosition().z + 5,
             //    _terrain.GetPosition().z + _terrain.terrainData.size.z);
             Destroy(transform.GetChild(0).FindChild("BacteriaProjector").gameObject);
+            _seeker.StartPath(transform.position, Target, OnPathComplete);
 
 
         }
-        _seeker.StartPath(transform.position, Target, OnPathComplete);
+       
     }
 
     void Update()
@@ -75,14 +77,16 @@ public class BacteriaController : MonoBehaviour
                 .GetComponent<InfectionController>()
                 .ParentBacterias.Remove(this);
             Destroy(gameObject);
+            ScoreController.BacteriasKilledThisLevel++;
             foreach (var child in GameObject.FindGameObjectsWithTag("Enemy").Where(x => x.GetComponent<BacteriaController>().ParentBacteria == gameObject))
             {
                 Destroy(child);
+                ScoreController.BacteriasKilledThisLevel++;
             }
             return;
         }
             
-        if (Path == null || _currentWaypoint >= Path.vectorPath.Count)
+        if (Path == null || _currentWaypoint >= Path.vectorPath.Count )
             return;
         var rb = GetComponent<Rigidbody>();
         var dir = (Path.vectorPath[_currentWaypoint] - transform.position).normalized;
@@ -93,11 +97,6 @@ public class BacteriaController : MonoBehaviour
         {
             _currentWaypoint++;
         }
-
-
-        //var bacteriaProjector = transform.GetChild(0).FindChild("BacteriaProjector").gameObject;
-        //if (!IsParent && bacteriaProjector.activeInHierarchy)
-        //    bacteriaProjector.SetActive(false);
     }
 
         
